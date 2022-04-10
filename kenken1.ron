@@ -1,0 +1,12 @@
+KenKen(
+    areas: [
+        (
+            ty: Add,
+            solution: 5,
+            fields: [
+                (0,0),
+                (1,0)
+            ],
+        )
+    ]
+)
