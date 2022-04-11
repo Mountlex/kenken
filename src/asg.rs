@@ -27,6 +27,10 @@ impl Assignment {
             .iter()
             .any(|(f, &v)| v == value && f.equal_axis(field))
     }
+
+    pub fn conflict_asg(&self, other: &Assignment) -> bool {
+        self.values.iter().any(|(f,v)| other.conflict(f, *v))
+    }
 }
 
 pub fn merge(asgs: Vec<Assignment>) -> Assignment {

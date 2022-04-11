@@ -4,18 +4,16 @@ use serde::{Deserialize, Serialize};
 
 mod asg;
 mod print;
+mod solve;
 
 fn main() -> anyhow::Result<()> {
     let input = read_to_string("kenken1.ron")?;
     let kenken: KenKen = ron::from_str(&input)?;
 
-    let mut asgs = Vec::new();
-    for area in &kenken.areas {
-        asgs.append(&mut area.possible_assignments());
-    }
-
-    print::print(&kenken, asgs, 10)?;
-
+   
+    
+    print::print(&kenken, vec![], 10)?;
+    
     Ok(())
 }
 
