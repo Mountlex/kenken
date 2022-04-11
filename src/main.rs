@@ -1,6 +1,7 @@
 use std::fs::read_to_string;
 
 use serde::{Deserialize, Serialize};
+use solve::solve;
 
 mod asg;
 mod print;
@@ -10,9 +11,9 @@ fn main() -> anyhow::Result<()> {
     let input = read_to_string("kenken1.ron")?;
     let kenken: KenKen = ron::from_str(&input)?;
 
-   
+   let sol = solve(&kenken);
     
-    print::print(&kenken, vec![], 10)?;
+    print::print(&kenken, sol, 10)?;
     
     Ok(())
 }
