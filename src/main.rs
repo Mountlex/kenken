@@ -9,6 +9,8 @@ fn main() -> anyhow::Result<()> {
     let input = read_to_string("kenken1.ron")?;
     let kenken: KenKen = ron::from_str(&input)?;
 
+    print::print(&kenken, vec![], 10)?;
+
     Ok(())
 }
 
@@ -30,7 +32,7 @@ impl Field {
 }
 
 #[derive(Debug, Deserialize, Serialize, PartialEq, Eq)]
-enum Type {
+pub enum Type {
     Mul,
     Sub,
     Add,
@@ -39,7 +41,7 @@ enum Type {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-struct Area {
+pub struct Area {
     ty: Type,
     solution: u16,
     fields: Vec<Field>,
@@ -57,16 +59,41 @@ impl Area {
     fn validate(&self) -> ValidationResult {
         Ok(())
     }
+
+    fn min_y_field(&self) -> u16 {
+        self.fields.iter().map(|f| f.1).min().unwrap()
+    }
+
+    fn min_yx_field(&self) -> Field {
+        *self.fields.iter().filter(|f| f.1 == self.min_y_field()).min_by_key(|f| f.0).unwrap()
+    }
+
+    pub fn id_field<'a>(&'a self, field: Field) -> Option<&'a Self> {
+        if field == self.min_yx_field() {
+            Some(self)
+        } else {
+            None
+        }
+    }
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-struct KenKen {
-    areas: Vec<Area>,
+pub struct KenKen {
+    pub areas: Vec<Area>,
+    pub size: u16,
 }
 
 impl KenKen {
     fn validate(&self) -> ValidationResult {
         Ok(())
+    }
+    
+    pub fn same_area(&self, field1: &Field, field2: &Field) -> bool {
+        self.areas.iter().any(|area| area.fields.contains(field1) &&  area.fields.contains(field2))
+    }
+
+    pub fn is_id_field<'a>(&'a self, field: Field) -> Option<&'a Area> {
+        self.areas.iter().find_map(|a| a.id_field(field))
     }
 }
 

@@ -18,8 +18,8 @@ impl Assignment {
         self.values.insert(field, value);
     }
 
-    pub fn get(&self, field: &Field) -> u16 {
-        self.values[field]
+    pub fn get(&self, field: &Field) -> Option<u16> {
+        self.values.get(field).cloned()
     }
 
     pub fn conflict(&self, field: &Field, value: u16) -> bool {
