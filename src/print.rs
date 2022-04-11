@@ -29,7 +29,7 @@ where
                 Type::Mul => write!(w, "{}{:<width$}", "*", area.solution, width=col_size-1)?,
                 Type::Div => write!(w, "{}{:<width$}", "/", area.solution, width=col_size-1)?,
                 Type::Sub => write!(w, "{}{:<width$}", "-", area.solution, width=col_size-1)?,
-                Type::Single => write!(w, "{:width$}", area.solution, width=col_size)?,
+                Type::Single => write!(w, "{:<width$}", area.solution, width=col_size)?,
             }
             w.reset()?;
         } else {
@@ -49,7 +49,7 @@ where
     print_vertical_sep(w, kenken, row, 0)?;
     for i in 1..=size {
         if let Some(asg) = asgs.iter().find_map(|asg| asg.get(&Field(i - 1, row))) {
-            write!(w, "{:width$}", asg, width=col_size)?;
+            write!(w, "{:^width$}", asg, width=col_size)?;
         } else {
             write!(w, "{:width$}", " ", width=col_size)?;
         }
