@@ -84,7 +84,8 @@ pub fn parse(base64_input: &str) -> Result<KenKen> {
                         "-" => Type::Sub,
                         "/" => Type::Div,
                         "*" => Type::Mul,
-                        _ => todo!(),
+                        "1" => Type::Single,
+                        _ => panic!("Unknown format!")
                     }
                 }
             }
