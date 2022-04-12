@@ -1,7 +1,7 @@
-use crate::{asg::Assignment, Field, KenKen, Type};
+use crate::{asg::Assignment, kenken::{KenKen, Field, Type}};
 use anyhow::Result;
 use std::io::Write;
-use termcolor::{ColorChoice, ColorSpec, StandardStream, WriteColor, Color};
+use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
 
 pub fn print(kenken: &KenKen, asgs: Vec<Assignment>, col_size: usize) -> Result<()> {
     let mut stdout = StandardStream::stdout(ColorChoice::Always);
@@ -15,7 +15,13 @@ pub fn print(kenken: &KenKen, asgs: Vec<Assignment>, col_size: usize) -> Result<
     Ok(())
 }
 
-fn print_row<W>(w: &mut W, kenken: &KenKen, asgs: &Vec<Assignment>, row: u16, col_size: usize) -> Result<()>
+fn print_row<W>(
+    w: &mut W,
+    kenken: &KenKen,
+    asgs: &Vec<Assignment>,
+    row: u16,
+    col_size: usize,
+) -> Result<()>
 where
     W: Write + WriteColor,
 {
@@ -25,15 +31,15 @@ where
         if let Some(area) = kenken.is_id_field(Field(i - 1, row)) {
             w.set_color(ColorSpec::new().set_bold(true))?;
             match area.ty {
-                Type::Add => write!(w, "{}{:<width$}", "+", area.solution, width=col_size-1)?,
-                Type::Mul => write!(w, "{}{:<width$}", "*", area.solution, width=col_size-1)?,
-                Type::Div => write!(w, "{}{:<width$}", "/", area.solution, width=col_size-1)?,
-                Type::Sub => write!(w, "{}{:<width$}", "-", area.solution, width=col_size-1)?,
-                Type::Single => write!(w, "{:<width$}", area.solution, width=col_size)?,
+                Type::Add => write!(w, "{}{:<width$}", "+", area.solution, width = col_size - 1)?,
+                Type::Mul => write!(w, "{}{:<width$}", "*", area.solution, width = col_size - 1)?,
+                Type::Div => write!(w, "{}{:<width$}", "/", area.solution, width = col_size - 1)?,
+                Type::Sub => write!(w, "{}{:<width$}", "-", area.solution, width = col_size - 1)?,
+                Type::Single => write!(w, "{:<width$}", area.solution, width = col_size)?,
             }
             w.reset()?;
         } else {
-            write!(w, "{:width$}", " ", width=col_size)?;
+            write!(w, "{:width$}", " ", width = col_size)?;
         }
         print_vertical_sep(w, kenken, row, i)?;
     }
@@ -41,7 +47,7 @@ where
 
     print_vertical_sep(w, kenken, row, 0)?;
     for i in 1..=size {
-        write!(w, "{:width$}", " ", width=col_size)?;
+        write!(w, "{:width$}", " ", width = col_size)?;
         print_vertical_sep(w, kenken, row, i)?;
     }
     writeln!(w, "")?;
@@ -49,9 +55,9 @@ where
     print_vertical_sep(w, kenken, row, 0)?;
     for i in 1..=size {
         if let Some(asg) = asgs.iter().find_map(|asg| asg.get(&Field(i - 1, row))) {
-            write!(w, "{:^width$}", asg, width=col_size)?;
+            write!(w, "{:^width$}", asg, width = col_size)?;
         } else {
-            write!(w, "{:width$}", " ", width=col_size)?;
+            write!(w, "{:width$}", " ", width = col_size)?;
         }
         print_vertical_sep(w, kenken, row, i)?;
     }
@@ -59,12 +65,11 @@ where
 
     print_vertical_sep(w, kenken, row, 0)?;
     for i in 1..=size {
-        write!(w, "{:width$}", " ", width=col_size)?;
+        write!(w, "{:width$}", " ", width = col_size)?;
         print_vertical_sep(w, kenken, row, i)?;
     }
     writeln!(w, "")?;
 
-   
     Ok(())
 }
 
@@ -82,11 +87,18 @@ where
     Ok(())
 }
 
-fn print_horizontal_separator<W>(w: &mut W, kenken: &KenKen, after_row: u16, col_size: usize) -> Result<()>
+fn print_horizontal_separator<W>(
+    w: &mut W,
+    kenken: &KenKen,
+    after_row: u16,
+    col_size: usize,
+) -> Result<()>
 where
     W: Write + WriteColor,
 {
+    w.set_color(ColorSpec::new().set_bold(true).set_bg(Some(Color::White)))?;
     write!(w, "+")?;
+    w.reset()?;
     for i in 0..kenken.size {
         if after_row == 0 || !kenken.same_area(&Field(i, after_row - 1), &Field(i, after_row)) {
             w.set_color(ColorSpec::new().set_bold(true).set_bg(Some(Color::White)))?;
@@ -99,7 +111,18 @@ where
                 write!(w, "-")?;
             }
         }
-        write!(w, "+")?;
+
+        if kenken.same_area(&Field(i, after_row - 1), &Field(i, after_row))
+            && kenken.same_area(&Field(i + 1, after_row - 1), &Field(i + 1, after_row))
+            && kenken.same_area(&Field(i, after_row - 1), &Field(i + 1, after_row - 1))
+            && kenken.same_area(&Field(i, after_row), &Field(i + 1, after_row))
+        {
+            write!(w, "+")?;
+        } else {
+            w.set_color(ColorSpec::new().set_bold(true).set_bg(Some(Color::White)))?;
+            write!(w, "+")?;
+            w.reset()?;
+        }
     }
     writeln!(w, "")?;
     Ok(())
