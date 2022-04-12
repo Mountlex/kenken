@@ -14,7 +14,7 @@ pub fn solve(kenken: &KenKen) -> Vec<Assignment> {
     let mut idx = 0;
 
     for area in &kenken.areas {
-        let area_asgs = area.possible_assignments();
+        let area_asgs = area.possible_assignments(kenken.size);
         let mut area_vars = Vec::<Variable>::new();
         for asg in area_asgs {
             let var = vars.add(variable().binary().name(format!("x_{}", idx)));
@@ -31,7 +31,7 @@ pub fn solve(kenken: &KenKen) -> Vec<Assignment> {
 
     for (i, asgi) in asgs.iter().enumerate() {
         for (j, asgj) in asgs.iter().enumerate() {
-            if asgi.conflict_asg(asgj) {
+            if i != j && asgi.conflict_asg(asgj) {
                 let vi = indexed_vars[i];
                 let vj = indexed_vars[j];
                 constraints.push((vi + vj).leq(1i32));
