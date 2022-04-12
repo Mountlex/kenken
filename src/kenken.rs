@@ -1,6 +1,5 @@
 use serde::{Deserialize, Serialize};
 
-
 #[derive(Debug, Clone, Copy, Deserialize, Serialize, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Field(pub u16, pub u16);
 
@@ -42,7 +41,6 @@ impl Area {
             fields,
         }
     }
-    
 
     fn min_y_field(&self) -> u16 {
         self.fields.iter().map(|f| f.1).min().unwrap()
@@ -68,13 +66,12 @@ impl Area {
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct KenKen {
+    pub id: u64,
     pub areas: Vec<Area>,
     pub size: u16,
 }
 
 impl KenKen {
-    
-
     pub fn same_area(&self, field1: &Field, field2: &Field) -> bool {
         self.areas
             .iter()

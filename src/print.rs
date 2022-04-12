@@ -1,4 +1,7 @@
-use crate::{asg::Assignment, kenken::{KenKen, Field, Type}};
+use crate::{
+    asg::Assignment,
+    kenken::{Field, KenKen, Type},
+};
 use anyhow::Result;
 use std::io::Write;
 use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
