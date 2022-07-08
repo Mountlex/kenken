@@ -1,4 +1,5 @@
 use clap::{Parser, Subcommand};
+use draw::DEFAULT_CONFIG;
 use kenken::KenKen;
 use parse::parse;
 use solve::solve;
@@ -11,6 +12,7 @@ mod parse;
 mod print;
 mod solve;
 mod validate;
+mod draw;
 
 fn main() -> anyhow::Result<()> {
     let args = Cli::parse();
@@ -26,6 +28,11 @@ fn main() -> anyhow::Result<()> {
             let input = read_to_string(path)?;
             let kenken: KenKen = ron::from_str(&input)?;
             print::print(&kenken, vec![], 10)?;
+        }
+        Commands::Draw { path } => {
+            let input = read_to_string(path)?;
+            let kenken: KenKen = ron::from_str(&input)?;
+            draw::draw(&kenken, vec![], &draw::DEFAULT_CONFIG)?;
         }
         Commands::Validate { path } => {
             let input = read_to_string(path)?;
@@ -66,6 +73,10 @@ enum Commands {
         path: PathBuf,
     },
     Print {
+        #[clap(parse(from_os_str))]
+        path: PathBuf,
+    },
+    Draw {
         #[clap(parse(from_os_str))]
         path: PathBuf,
     },

@@ -115,7 +115,7 @@ where
             }
         }
 
-        if kenken.same_area(&Field(i, after_row - 1), &Field(i, after_row))
+        if after_row > 0 && kenken.same_area(&Field(i, after_row - 1), &Field(i, after_row))
             && kenken.same_area(&Field(i + 1, after_row - 1), &Field(i + 1, after_row))
             && kenken.same_area(&Field(i, after_row - 1), &Field(i + 1, after_row - 1))
             && kenken.same_area(&Field(i, after_row), &Field(i + 1, after_row))
