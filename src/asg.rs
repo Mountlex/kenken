@@ -8,13 +8,13 @@ pub struct Assignment {
 }
 
 impl Assignment {
-    fn empty() -> Self {
+    pub fn empty() -> Self {
         Self {
             values: HashMap::default(),
         }
     }
 
-    fn set(&mut self, field: Field, value: u16) {
+    pub fn set(&mut self, field: Field, value: u16) {
         self.values.insert(field, value);
     }
 

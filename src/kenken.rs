@@ -81,4 +81,13 @@ impl KenKen {
     pub fn is_id_field<'a>(&'a self, field: Field) -> Option<&'a Area> {
         self.areas.iter().find_map(|a| a.id_field(field))
     }
+
+    pub fn add_to_area_if_exists<'a>(&mut self, field: &Field, to_add: Field) -> bool {
+        if let Some(area) = self.areas.iter_mut().find(|area| area.fields.contains(field)) {
+            area.fields.push(to_add);
+            true
+        } else {
+            false
+        }
+    }
 }

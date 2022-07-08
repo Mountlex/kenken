@@ -7,12 +7,13 @@ use std::{fs::read_to_string, path::PathBuf};
 use validate::Validator;
 
 mod asg;
+mod draw;
 mod kenken;
+mod gen;
 mod parse;
 mod print;
 mod solve;
 mod validate;
-mod draw;
 
 fn main() -> anyhow::Result<()> {
     let args = Cli::parse();
@@ -24,6 +25,11 @@ fn main() -> anyhow::Result<()> {
             let sol = solve(&kenken);
             print::print(&kenken, sol, 10)?;
         }
+        Commands::Generate { size } => {
+            let kenken = gen::generate(size);
+            let sol = solve(&kenken);
+            print::print(&kenken, sol, 10)?;
+        }
         Commands::Print { path } => {
             let input = read_to_string(path)?;
             let kenken: KenKen = ron::from_str(&input)?;
@@ -32,7 +38,7 @@ fn main() -> anyhow::Result<()> {
         Commands::Draw { path } => {
             let input = read_to_string(path)?;
             let kenken: KenKen = ron::from_str(&input)?;
-            draw::draw(&kenken, vec![], &draw::DEFAULT_CONFIG)?;
+            draw::draw(&kenken, &draw::DEFAULT_CONFIG)?;
         }
         Commands::Validate { path } => {
             let input = read_to_string(path)?;
@@ -67,6 +73,9 @@ enum Commands {
 
         #[clap(short, long)]
         verbose: bool,
+    },
+    Generate {
+        size: u16,
     },
     Validate {
         #[clap(parse(from_os_str))]
