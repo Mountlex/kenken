@@ -42,6 +42,10 @@ impl Area {
         }
     }
 
+    pub fn size(&self) -> u16 {
+        self.fields.len() as u16
+    }
+
     fn min_y_field(&self) -> u16 {
         self.fields.iter().map(|f| f.1).min().unwrap()
     }
@@ -82,12 +86,16 @@ impl KenKen {
         self.areas.iter().find_map(|a| a.id_field(field))
     }
 
-    pub fn add_to_area_if_exists<'a>(&mut self, field: &Field, to_add: Field) -> bool {
+    pub fn add_to_area_if_exists(&mut self, field: &Field, to_add: Field) -> bool {
         if let Some(area) = self.areas.iter_mut().find(|area| area.fields.contains(field)) {
             area.fields.push(to_add);
             true
         } else {
             false
         }
+    }
+
+    pub fn get_area_mut<'a>(&'a mut self, field: &Field) -> Option<&'a mut Area> {
+        self.areas.iter_mut().find(|area| area.fields.contains(field))
     }
 }

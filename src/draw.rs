@@ -1,7 +1,4 @@
-use crate::{
-    asg::Assignment,
-    kenken::{Field, KenKen, Type},
-};
+use crate::kenken::{Field, KenKen, Type};
 use anyhow::Result;
 use image::{GrayImage, ImageBuffer, Luma};
 use imageproc::{
