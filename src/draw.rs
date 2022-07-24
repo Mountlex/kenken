@@ -134,7 +134,7 @@ fn print_targets<'a>(
                 let text = match area.ty {
                     Type::Add => format!("{}{:<width$}", "+", area.solution, width = 20 - 1),
                     Type::Mul => format!("{}{:<width$}", "*", area.solution, width = 20 - 1),
-                    Type::Div => format!("{}{:<width$}", "/", area.solution, width = 20 - 1),
+                    Type::Div => format!("{}{:<width$}", "÷", area.solution, width = 20 - 1),
                     Type::Sub => format!("{}{:<width$}", "-", area.solution, width = 20 - 1),
                     Type::Single => format!("{:<width$}", area.solution, width = 20),
                 };
