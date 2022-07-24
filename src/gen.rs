@@ -1,11 +1,19 @@
 use std::vec;
 
-use rand::{prelude::IteratorRandom, Rng};
+use rand::{prelude::{IteratorRandom, Distribution}, Rng, thread_rng};
 
 use crate::{
     asg::Assignment,
     kenken::{Area, Field, KenKen, Type},
 };
+
+pub struct DifficultyConfig {
+    pub p_add: f32,
+    pub p_mul: f32,
+    pub p_div: f32,
+    pub p_sub: f32,
+    pub size_factor: f32,
+}
 
 fn add_field_biased(kenken: &mut KenKen, to_add: Field, neighbor: &Field, max_area: u16) -> bool {
     let mut rng = rand::thread_rng();
@@ -24,14 +32,14 @@ fn add_field_biased(kenken: &mut KenKen, to_add: Field, neighbor: &Field, max_ar
     }
 }
 
-fn random_area_gen(size: u16) -> KenKen {
+fn random_area_gen(size: u16, config: &DifficultyConfig) -> KenKen {
     let mut kenken = KenKen {
         id: 0,
         areas: vec![],
         size,
     };
 
-    let max_area = size / 2 + 1;
+    let max_area = (size as f32 * config.size_factor).ceil() as u16; 
 
     for i in 0..size {
         for j in 0..size {
@@ -95,48 +103,75 @@ fn random_solution(size: u16) -> Assignment {
     sol
 }
 
-pub fn generate(size: u16) -> KenKen {
-    let mut kenken = random_area_gen(size);
-    let sol = random_solution(size);
+fn assign_area(area: &mut Area, typ: Type, f1: u64, f2: u64) {
+    area.ty = typ;
+    match typ {
+        Type::Div => {
+            if f1 > f2 {
+                area.solution = f1 / f2;
+            } else {
+                area.solution = f2 / f1;
+            }
+        },
+        Type::Sub => {
+            if f1 > f2 {
+                area.solution = f1 - f2;
+            } else {
+                area.solution = f2 - f1;
+            }
+        },
+        Type::Add => {
+            area.solution = f1 + f2;
+        },
+        Type::Mul => {
+            area.solution = f1 * f2;
+        },
+        Type::Single => {}
+    }
+}
 
-    for area in &mut kenken.areas {
+pub fn generate(size: u16, config: &DifficultyConfig) -> KenKen {
+
+    assert!(config.p_add + config.p_div + config.p_mul + config.p_sub == 1.0);
+
+    let mut kenken = random_area_gen(size, config);
+    let sol = random_solution(size);
+    let mut rng = thread_rng();
+
+    for mut area in &mut kenken.areas {
         if area.fields.len() == 1 {
-            area.solution = sol.get(&area.fields[0]).unwrap();
+            area.solution = sol.get(&area.fields[0]).unwrap() as u64;
         } else if area.fields.len() == 2 {
-            let f1 = sol.get(&area.fields[0]).unwrap();
-            let f2 = sol.get(&area.fields[1]).unwrap();
+            let f1 = sol.get(&area.fields[0]).unwrap() as u64;
+            let f2 = sol.get(&area.fields[1]).unwrap() as u64;
+            assert_ne!(f1,f2);
             let divisible = (f1 > f2 && f1 % f2 == 0) || (f2 > f1 && f2 % f1 == 0);
 
-            if divisible && rand::random() {
-                area.ty = Type::Div;
-                if f1 > f2 {
-                    area.solution = f1 / f2;
-                } else {
-                    area.solution = f2 / f1;
-                }
+            if divisible {
+                let choices = [Type::Add, Type::Sub, Type::Mul, Type::Div];
+                let dist = rand::distributions::WeightedIndex::new(&[config.p_add, config.p_sub, config.p_mul, config.p_div]).unwrap();
+                assign_area(&mut area, choices[dist.sample(&mut rng)], f1, f2);
             } else {
-                area.ty = Type::Sub;
-                if f1 > f2 {
-                    area.solution = f1 - f2;
-                } else {
-                    area.solution = f2 - f1;
-                }
+                let choices = [Type::Add, Type::Sub, Type::Mul];
+                let dist = rand::distributions::WeightedIndex::new(&[config.p_add, config.p_sub, config.p_mul]).unwrap();
+                assign_area(&mut area, choices[dist.sample(&mut rng)], f1, f2);
             }
         } else {
-            if rand::random() {
+            let choices = [Type::Add, Type::Mul];
+            let dist = rand::distributions::WeightedIndex::new(&[config.p_add, config.p_mul]).unwrap();
+            if choices[dist.sample(&mut rng)] == Type::Mul {
                 area.ty = Type::Mul;
                 area.solution = area
                     .fields
                     .iter()
                     .map(|f| sol.get(f).unwrap())
-                    .fold(1, |a, b| a * b);
+                    .fold(1, |a, b| a * (b as u64));
             } else {
                 area.ty = Type::Add;
-                area.solution = area.fields.iter().map(|f| sol.get(f).unwrap()).sum();
+                area.solution = area.fields.iter().map(|f| sol.get(f).unwrap() as u64).sum();
             }
         }
     }
 
-    crate::print::print(&kenken, vec![sol], 10).unwrap();
     kenken
 }

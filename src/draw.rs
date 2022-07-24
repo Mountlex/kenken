@@ -1,3 +1,5 @@
+use std::path::{PathBuf};
+
 use crate::kenken::{Field, KenKen, Type};
 use anyhow::Result;
 use image::{GrayImage, ImageBuffer, Luma};
@@ -22,13 +24,13 @@ pub struct DrawConfig {
 pub const DEFAULT_CONFIG: DrawConfig = DrawConfig {
     field_size: 200,
     thick: 12,
-    thin: 4,
+    thin: 2,
     offset: 50,
     target_x: 20,
     target_y: 20,
 };
 
-pub fn draw(kenken: &KenKen, config: &DrawConfig) -> Result<()> {
+pub fn draw(kenken: &KenKen, file: &PathBuf, config: &DrawConfig) -> Result<()> {
     let image_size = kenken.size * config.field_size + 2 * config.offset;
     let mut img: GrayImage = ImageBuffer::from_pixel(image_size as u32, image_size as u32, WHITE);
 
@@ -51,7 +53,7 @@ pub fn draw(kenken: &KenKen, config: &DrawConfig) -> Result<()> {
 
     print_targets(&mut img, kenken, config, scale, &font);
 
-    img.save("test.png")?;
+    img.save(file)?;
     Ok(())
 }
 

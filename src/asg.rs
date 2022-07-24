@@ -87,7 +87,7 @@ impl Area {
                 size,
             ),
             Type::Single => vec![Assignment {
-                values: [(self.fields.first().unwrap().clone(), self.solution)].into(),
+                values: [(self.fields.first().unwrap().clone(), self.solution as u16)].into(),
             }],
         }
     }
@@ -103,8 +103,8 @@ fn inc_assignments(
     ty: &IncType,
     rem_fields: Vec<Field>,
     partial_asg: Option<Assignment>,
-    partial_sol: u16,
-    target_sol: u16,
+    partial_sol: u64,
+    target_sol: u64,
     size: u16,
 ) {
     if rem_fields.is_empty() {
@@ -125,8 +125,8 @@ fn inc_assignments(
                 asg.set(*field, v);
 
                 let new_partial_sol = match ty {
-                    IncType::Add => partial_sol + v,
-                    IncType::Mul => partial_sol * v,
+                    IncType::Add => partial_sol + v as u64,
+                    IncType::Mul => partial_sol * v as u64,
                 };
 
                 inc_assignments(
@@ -153,7 +153,7 @@ fn dec_assignments(
     ty: DecType,
     field1: Field,
     field2: Field,
-    solution: u16,
+    solution: u64,
     size: u16,
 ) -> Vec<Assignment> {
     let mut asgs = Vec::<Assignment>::new();
@@ -171,7 +171,7 @@ fn dec_assignments(
                     }
                     DecType::Sub => j - i,
                 };
-                if sol == solution {
+                if sol as u64 == solution {
                     let mut asg1 = Assignment::empty();
                     asg1.set(field1, i);
                     asg1.set(field2, j);

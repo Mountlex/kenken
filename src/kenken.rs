@@ -17,7 +17,7 @@ impl Field {
     }
 }
 
-#[derive(Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[derive(Debug, Deserialize, Serialize, PartialEq, Eq, Clone, Copy)]
 pub enum Type {
     Mul,
     Sub,
@@ -29,12 +29,12 @@ pub enum Type {
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Area {
     pub ty: Type,
-    pub solution: u16,
+    pub solution: u64,
     pub fields: Vec<Field>,
 }
 
 impl Area {
-    pub fn new(ty: Type, solution: u16, fields: Vec<Field>) -> Self {
+    pub fn new(ty: Type, solution: u64, fields: Vec<Field>) -> Self {
         Area {
             ty,
             solution,
@@ -87,7 +87,11 @@ impl KenKen {
     }
 
     pub fn add_to_area_if_exists(&mut self, field: &Field, to_add: Field) -> bool {
-        if let Some(area) = self.areas.iter_mut().find(|area| area.fields.contains(field)) {
+        if let Some(area) = self
+            .areas
+            .iter_mut()
+            .find(|area| area.fields.contains(field))
+        {
             area.fields.push(to_add);
             true
         } else {
@@ -95,7 +99,16 @@ impl KenKen {
         }
     }
 
+    pub fn total_number_of_assignments(&self) -> usize {
+        self.areas
+            .iter()
+            .map(|area| area.possible_assignments(self.size).len())
+            .sum()
+    }
+
     pub fn get_area_mut<'a>(&'a mut self, field: &Field) -> Option<&'a mut Area> {
-        self.areas.iter_mut().find(|area| area.fields.contains(field))
+        self.areas
+            .iter_mut()
+            .find(|area| area.fields.contains(field))
     }
 }

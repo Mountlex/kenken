@@ -72,7 +72,7 @@ pub fn parse(base64_input: &str) -> Result<KenKen> {
             let mut ty = Type::Single;
 
             for f in &area {
-                let t = targets[f.1 as usize][f.0 as usize].parse::<u16>().unwrap();
+                let t = targets[f.1 as usize][f.0 as usize].parse::<u64>().unwrap();
                 if t > 0 {
                     target = t;
                 }
