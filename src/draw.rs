@@ -1,6 +1,9 @@
-use std::path::{PathBuf};
+use std::path::PathBuf;
 
-use crate::kenken::{Field, KenKen, Type};
+use crate::{
+    gen::DifficultyConfig,
+    kenken::{Field, KenKen, Type},
+};
 use anyhow::Result;
 use image::{GrayImage, ImageBuffer, Luma};
 use imageproc::{
@@ -30,9 +33,15 @@ pub const DEFAULT_CONFIG: DrawConfig = DrawConfig {
     target_y: 20,
 };
 
-pub fn draw(kenken: &KenKen, file: &PathBuf, config: &DrawConfig) -> Result<()> {
+pub fn draw(
+    kenken: &KenKen,
+    file: &PathBuf,
+    config: &DrawConfig,
+    gen_config: Option<&DifficultyConfig>,
+) -> Result<()> {
     let image_size = kenken.size * config.field_size + 2 * config.offset;
-    let mut img: GrayImage = ImageBuffer::from_pixel(image_size as u32, image_size as u32, WHITE);
+    let mut img: GrayImage =
+        ImageBuffer::from_pixel(image_size as u32, image_size as u32 + 100, WHITE);
 
     let font = Vec::from(include_bytes!("../assets/DejaVuSans.ttf") as &[u8]);
     let font = Font::try_from_vec(font).unwrap();
@@ -53,6 +62,36 @@ pub fn draw(kenken: &KenKen, file: &PathBuf, config: &DrawConfig) -> Result<()> 
 
     print_targets(&mut img, kenken, config, scale, &font);
 
+    if let Some(gen_config) = gen_config {
+        draw_text_mut(
+            &mut img,
+            BLACK,
+            config.offset as i32,
+            10,
+            scale,
+            &font,
+            &format!(
+                "KnKn {} (s = {}, add = {}, mul = {}, sub = {}, div = {})",
+                kenken.id,
+                gen_config.size_factor,
+                gen_config.p_add,
+                gen_config.p_mul,
+                gen_config.p_sub,
+                gen_config.p_div
+            ),
+        );
+    } else {
+        draw_text_mut(
+            &mut img,
+            BLACK,
+            config.offset as i32,
+            10,
+            scale,
+            &font,
+            &format!("KnKn {}", kenken.id),
+        );
+    }
+
     img.save(file)?;
     Ok(())
 }
@@ -69,7 +108,7 @@ fn print_horizontal_separators(
                 c,
                 Rect::at(
                     (i * config.field_size + config.offset) as i32,
-                    (after_row * config.field_size + config.offset) as i32,
+                    (after_row * config.field_size + config.offset + 100) as i32,
                 )
                 .of_size(config.field_size as u32, config.thick as u32),
                 BLACK,
@@ -79,7 +118,7 @@ fn print_horizontal_separators(
                 c,
                 Rect::at(
                     (i * config.field_size + config.offset) as i32,
-                    (after_row * config.field_size + config.offset) as i32,
+                    (after_row * config.field_size + config.offset + 100) as i32,
                 )
                 .of_size(config.field_size as u32, config.thin as u32),
                 BLACK,
@@ -102,7 +141,7 @@ fn print_vertical_separators(
                 c,
                 Rect::at(
                     (after_column * config.field_size + config.offset) as i32,
-                    (i * config.field_size + config.offset) as i32,
+                    (i * config.field_size + config.offset + 100) as i32,
                 )
                 .of_size(config.thick as u32, config.field_size as u32),
                 BLACK,
@@ -112,7 +151,7 @@ fn print_vertical_separators(
                 c,
                 Rect::at(
                     (after_column * config.field_size + config.offset) as i32,
-                    (i * config.field_size + config.offset) as i32,
+                    (i * config.field_size + config.offset + 100) as i32,
                 )
                 .of_size(config.thin as u32, config.field_size as u32),
                 BLACK,
@@ -142,7 +181,7 @@ fn print_targets<'a>(
                     c,
                     BLACK,
                     (config.offset + i * config.field_size + config.target_x) as i32,
-                    (config.offset + j * config.field_size + config.target_y) as i32,
+                    (config.offset + j * config.field_size + config.target_y + 100) as i32,
                     scale,
                     font,
                     &text,

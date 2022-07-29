@@ -6,6 +6,7 @@ use parse::parse;
 use solve::solve;
 use std::{fs::read_to_string, path::PathBuf};
 use validate::Validator;
+use std::fs;
 
 mod asg;
 mod draw;
@@ -30,7 +31,6 @@ fn main() -> Result<()> {
             size,
             add, sub, mul, div,
             size_factor,
-            save,
         } => {
             // let mut wtr = csv::Writer::from_path("results.csv")?;
             // wtr.write_record(&["size", "type", "asgs"])?;
@@ -49,20 +49,25 @@ fn main() -> Result<()> {
 
             // wtr.flush()?;
 
+            let id = fs::read_dir("knkns")?.count() as u64 + 1;
+
+            let gen_config = DifficultyConfig {
+                size_factor,
+                p_add: add,
+                p_sub: sub,
+                p_mul: mul,
+                p_div: div,
+            };
             let kenken = gen::generate(
+                id,
                 size,
-                &DifficultyConfig {
-                    size_factor,
-                    p_add: add,
-                    p_sub: sub,
-                    p_mul: mul,
-                    p_div: div,
-                },
+                &gen_config,
             );
 
-            if let Some(save) = save {
-                draw::draw(&kenken, &save, &draw::DEFAULT_CONFIG)?;
-            }
+            let content = ron::to_string(&kenken)?;
+            std::fs::write(format!("knkns_data/puzzle{}.ron", kenken.id), content)?;
+            draw::draw(&kenken, &PathBuf::from(format!("knkns/puzzle{}.png", kenken.id)), &draw::DEFAULT_CONFIG, Some(&gen_config))?;
+            
         }
         Commands::Print { path } => {
             let input = read_to_string(path)?;
@@ -122,9 +127,6 @@ enum Commands {
 
         #[clap(long, default_value = "0.5")]
         size_factor: f32,
-
-        #[clap(long, parse(from_os_str))]
-        save: Option<PathBuf>,
     },
     Validate {
         #[clap(parse(from_os_str))]

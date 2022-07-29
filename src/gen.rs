@@ -32,9 +32,9 @@ fn add_field_biased(kenken: &mut KenKen, to_add: Field, neighbor: &Field, max_ar
     }
 }
 
-fn random_area_gen(size: u16, config: &DifficultyConfig) -> KenKen {
+fn random_area_gen(id: u64, size: u16, config: &DifficultyConfig) -> KenKen {
     let mut kenken = KenKen {
-        id: 0,
+        id,
         areas: vec![],
         size,
     };
@@ -130,11 +130,11 @@ fn assign_area(area: &mut Area, typ: Type, f1: u64, f2: u64) {
     }
 }
 
-pub fn generate(size: u16, config: &DifficultyConfig) -> KenKen {
+pub fn generate(id: u64, size: u16, config: &DifficultyConfig) -> KenKen {
 
     assert!(config.p_add + config.p_div + config.p_mul + config.p_sub == 1.0);
 
-    let mut kenken = random_area_gen(size, config);
+    let mut kenken = random_area_gen(id,size, config);
     let sol = random_solution(size);
     let mut rng = thread_rng();
 
